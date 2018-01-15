@@ -1,0 +1,67 @@
+version: '3.3'
+services:
+  elasticsearch_master:
+    image: elasticsearch
+    environment:
+      - cluster.name=gyg_elk
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - node.name=gyg_elk_master_node_${NODE}
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
+      - network.publish_host=${NT_HOST}
+      - http.port=8200
+      - transport.tcp.port=8300
+      - node.data=false
+      - node.master=true
+      - node.ingest=false
+      - discovery.zen.ping.unicast.hosts=${ELASTIC_SEARCH_HOSTS}
+    ports:
+      - 8200:8200
+      - 8300:8300
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  dc-es-coordinator:
+    image: elasticsearch
+    environment:
+      - cluster.name=gyg_elk
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - node.name=gyg_elk_coordinator_${NODE}
+      - node.master=false 
+      - node.data=false 
+      - node.ingest=false
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
+      - network.publish_host=${NT_HOST}
+      - http.port=8202
+      - transport.tcp.port=8302
+      - discovery.zen.ping.unicast.hosts=${ELASTIC_SEARCH_HOSTS}
+    ports:
+      - 8202:8202
+      - 8302:8302
+    networks:
+      - elk
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
+  dynacore_kibana:
+    image: kibana
+    environment:
+      - ELASTICSEARCH_URL=http://{url}:8202
+    ports:
+      - 8601:5601
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    networks:
+      - elk
+volumes:
+  kibana:
+networks:
+  elk:
+    external: true

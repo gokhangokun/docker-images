@@ -1,0 +1,52 @@
+version: '3.3'
+services:
+  elasticsearch_master:
+    image: elasticsearch
+    environment:
+      - cluster.name=gyg_elk
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - node.name=gyg_elk_master_node_${NODE}
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
+      - network.publish_host=${NT_HOST}
+      - http.port=8200
+      - transport.tcp.port=8300
+      - node.data=false
+      - node.master=true
+      - node.ingest=false
+      - discovery.zen.ping.unicast.hosts=${ELASTIC_SEARCH_HOSTS}
+    ports:
+      - 8200:8200
+      - 8300:8300
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  elasticsearch_data:
+    image: elasticsearch
+    environment:
+      - cluster.name=gyg_elk
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g" 
+      - node.name=gyg_elk_data_node_${NODE}
+      - node.data=true
+      - network.host=0.0.0.0
+      - network.bind_host=0.0.0.0
+      - network.publish_host=${NT_HOST}
+      - http.port=8201
+      - transport.tcp.port=8301
+      - node.master=false
+      - node.ingest=false
+      - discovery.zen.ping.unicast.hosts=${ELASTIC_SEARCH_HOSTS}
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - 8201:8201
+      - 8301:8301
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+volumes:
+  esdata:
