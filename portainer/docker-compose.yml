@@ -1,0 +1,13 @@
+version: '3.3'
+services:
+  myapp-portainer:
+    image: portainer
+    ports:
+      - 9010:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.api == true

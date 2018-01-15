@@ -1,0 +1,29 @@
+version: '3.3'
+services:
+  myapp-mongo:
+    image: mongo:3.6
+    networks:
+      - myapp_db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-admin}
+    volumes:
+      - myapp-mongodb-data:/data/db
+      - myapp-mongodb-config:/data/configdb
+    ports:
+      - 28017:27017
+    deploy:
+      placement:
+        constraints:
+          - node.labels.db == true
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://localhost:25000
+        tag: myapp-mongo
+volumes:
+  myapp-mongodb-data:
+  myapp-mongodb-config:
+networks:
+  myapp_db:
+    external: true

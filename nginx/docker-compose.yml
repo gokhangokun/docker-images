@@ -1,0 +1,24 @@
+version: '3.3'
+services:
+  myapp_nginx:
+    image: nginx
+    networks:
+      - myapp_api
+      - myapp_db
+    ports:
+      - 8090:80
+    deploy:
+      mode: global
+      update_config:
+        delay: 10s
+        monitor: 2s
+    logging:
+     driver: gelf
+     options:
+       gelf-address: udp://localhost:25000
+       tag: nginx
+networks:
+  myapp_api:
+    external: true
+  myapp_db:
+    external: true
